@@ -1,0 +1,10 @@
+#displayProgress {
+    background-color: gray;
+    min-height: 20px;
+}
+
+#displayActive {
+    background-color: gray;
+    min-height: 20px;
+
+}
