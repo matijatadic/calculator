@@ -1,73 +1,130 @@
-let displayCurrent = document.querySelector('#displayActive');
-let numbers = document.querySelectorAll(".numberKeys");
-let clickNumber = document.querySelectorAll("#keynumber");
+class Calculator {
+    constructor(previousOperandTextElement, currentOperandTextElement) {
+        this.previousOperandTextElement=previousOperandTextElement;
+        this.currentOperandTextElement=currentOperandTextElement;
+        this.clear()
+    };
 
+    clear() {
+        this.currentOperand='';
+        this.previousOperand='';
+        this.operation = undefined;
+    };
 
-displayCurrent.textContent='';
+    deleteChar() {
+        this.currentOperand = this.currentOperand.toString().slice(0,-1)
+    }; 
 
-console.log(numbers);
+    appendNumber(number) {
+        if (number === '.' && this.currentOperand.includes('.')) return
+        this.currentOperand = this.currentOperand.toString() + number.toString()
+    };
 
+    chooseOperation(operation) {
+        if (this.currentOperand === '') return
+        if (this.previousOperand !== ''){
+            this.compute()
+        }
+        this.operation=operation
+        this.previousOperand = this.currentOperand
+        this.currentOperand=''
+    };
 
-numbers.forEach(button => button.addEventListener ('click', populateDisplay));
+    compute() {
+        let computation
+        let previous = parseFloat(this.previousOperand)
+        let current = parseFloat(this.currentOperand)
+        if (isNaN(previous) || isNaN(current)) return
+        switch (this.operation) {
+            case '+':
+                computation = previous + current
+                break;
+            case '-':
+                computation = previous - current
+                break;
+            case '*':
+                computation = previous * current
+                break;
+            case '÷':
+                computation = previous / current
+                break;
+            default:
+                return
+        }
+        this.currentOperand = computation
+        this.operation = undefined
+        this.previousOperand = ''
+    };
 
+    getDisplayNumber(number) {
+        const stringNumber = number.toString()
+        const integerDigits = parseFloat(stringNumber.split('.')[0])
+        const decimalDigits = stringNumber.split('.')[1]
+        let integerDisplay
+        if (isNaN(integerDigits)) {
+            integerDisplay = ''
+        }
+        else {
+            integerDisplay = integerDigits.toLocaleString('en', { maximumFractionDigits: 0 })
+        }
+        if (decimalDigits != null) {
+            return `${integerDisplay}.${decimalDigits}`
+        } 
+        else {
+            return integerDisplay
+        }
+    };
 
-//funkcije za racunske operacije
-function add(a,b) {
-    return a+b;
-};
-
-function subtract (a,b) {
-    return a-b;
-};
-
-function multiply (a,b) {
-    return a*b;
-};
-
-function divide (a,b) {
-    return a/b;
-};
-
-//funkcija koja poziva funkcije za racunske operacije
-//ovisno o odabranom operatoru
-function operate (operator,a,b){
-    switch (operator) {
-        case '+':
-            return add(a,b);
-            break;
-        case '-':
-            return subtract(a,b);
-            break;
-        case '*' :
-            return multiply(a,b);
-            break;
-        case '/' :
-            if (b===0) {
-                return 'Error';
-            }
-            else {
-                return divide(a,b);
-            }
-            break;
+    updateDisplay() {
+        this.currentOperandTextElement.innerText =
+          this.getDisplayNumber(this.currentOperand)
+        if (this.operation != null) {
+          this.previousOperandTextElement.innerText =
+            `${this.getDisplayNumber(this.previousOperand)} ${this.operation}`
+        } else {
+          this.previousOperandTextElement.innerText = ''
+        }
     };
 };
 
-function numpad (numberKey) {
-    return numberKey.textContent;
-};
+const numberButtons = document.querySelectorAll('[data-number]');
+const operatorButtons = document.querySelectorAll('[data-operation]');
+const equalButton = document.querySelector('[data-equals]');
+const deleteButton = document.querySelector('[data-delete]');
+const allClearButton = document.querySelector('[data-all-clear]');
+const previousOperandTextElement = document.querySelector('[data-previous-operand]');
+const currentOperandTextElement = document.querySelector('[data-current-operand]');
+
+numberButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        calculator.appendNumber(button.innerText)
+        calculator.updateDisplay ()
+    })
+});
+
+operatorButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        calculator.chooseOperation(button.innerText)
+        calculator.updateDisplay()
+    })
+});
+
+equalButton.addEventListener ('click', () => {
+    calculator.compute()
+    calculator.updateDisplay()
+});
 
 
 
-//funkcija za popunjavanje displaya
-//sprema odabrane znamenke i operatore
-//unutar display elementa i sprema
-//vrijednosti za daljnu upotrebu
-function populateDisplay () {
-    //funkcija prima brojeve i racunske operatore
-    //mjenja display varijablu naredbom textContent/innerHTML
-    numpad (numberKey);
-    displayCurrent.textContent += numpad(numberKey);
-    
+allClearButton.addEventListener('click', button => {
+    calculator.clear()
+    calculator.updateDisplay()
+});
 
+deleteButton.addEventListener('click', button => {
+    calculator.deleteChar()
+    calculator.updateDisplay()
+});
 
-}
+let calculator = new Calculator(previousOperandTextElement, currentOperandTextElement)
+

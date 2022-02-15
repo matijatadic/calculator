@@ -1,9 +1,9 @@
-#displayProgress {
+.previous-operand {
     background-color: gray;
     min-height: 20px;
 }
 
-#displayActive {
+.current-operand {
     background-color: gray;
     min-height: 20px;
 
